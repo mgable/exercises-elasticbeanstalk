@@ -86,50 +86,92 @@
 	   			setTimeout(checkAvailability,10000);
 	   		}
 	   	}
-	})
+	});
  }
 
 
-//checkAvailability()
- elasticbeanstalk.createApplication(applicationParams, function(err, data)
- {
-	 console.log('Creating application');
-	 console.log(data);
-	 if (err)
-	 {
-		 if (err.message.indexOf("already exists") > -1)
-		 {
-			 console.log('Application already exists, continuing on');
-		 }
-		 else
-		 {
-			 console.log(err,err.stack); // an error occurred
-		 }
-	 }
-	 else
-	 {
-		 elasticbeanstalk.createApplicationVersion(versionParams, function(err, data)
-		 {
-			 console.log('Creating application version....');
-			 console.log(data);
+//checkAvailability();
 
-			 if (err) console.log(err, err.stack); // an error occurred
+function deleteApplication(){ // does not working within a running enviroment
+	var params = {
+		ApplicationName: applicationName
+	};
 
-			 else
-			 {
-				 elasticbeanstalk.createEnvironment(environmentParams, function(err, data)
-				 {
-					 console.log('Creating application environment....');
-					 console.log(data);
+	elasticbeanstalk.deleteApplication(params, function(err, data) {
+		if (err) {
+			console.log(err, err.stack); 
+		} else{
+			console.log(data); 
+		}
+	});
+}
 
-					 setTimeout(checkAvailability, 10000);
-					if (err) console.log(err, err.stack); // an error occurred
+function deleteEnviroment(){
+	var params = {
+		EnvironmentName: environmentName
+	};
 
-				 });
-			 }
-		 });
-	 }
- });
+	elasticbeanstalk.terminateEnvironment(params, function(err, data) {
+		if (err) {
+			console.log(err, err.stack); 
+		} else {  
+			console.log(data);  
+		}
+
+	});
+}
+
+function describeApplications(){
+	var params = {
+		ApplicationNames: [applicationName]
+	};
+
+	elasticbeanstalk.describeApplications(params, function(err, data) {
+		if (err) console.log(err, err.stack); // an error occurred
+		else     console.log(data);           // successful response
+	});
+}
+
+deleteEnviroment();
+
+// elasticbeanstalk.createApplication(applicationParams, function(err, data){
+// 	 console.log('Creating application');
+// 	 console.log(data);
+// 	 if (err)
+// 	 {
+// 		 if (err.message.indexOf("already exists") > -1)
+// 		 {
+// 			 console.log('Application already exists, continuing on');
+// 		 }
+// 		 else
+// 		 {
+// 			 console.log(err,err.stack); // an error occurred
+// 		 }
+// 	 }
+// 	 else
+// 	 {
+// 		 elasticbeanstalk.createApplicationVersion(versionParams, function(err, data)
+// 		 {
+// 			 console.log('Creating application version....');
+// 			 console.log(data);
+
+// 			 if (err) console.log(err, err.stack); // an error occurred
+
+// 			 else
+// 			 {
+// 				 elasticbeanstalk.createEnvironment(environmentParams, function(err, data)
+// 				 {
+// 					 console.log('Creating application environment....');
+// 					 console.log(data);
+
+// 					 setTimeout(checkAvailability, 10000);
+// 					if (err) console.log(err, err.stack); // an error occurred
+
+// 				 });
+// 			 }
+// 		 });
+// 	 }
+//  });
 
 
 })();
