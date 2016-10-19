@@ -1,9 +1,9 @@
 (function(){
 	"use strict";
 
-	 var applicationName = "my-new-test-xxx";
- var environmentName = "my-test-enviro-xxx";
- var regionName = "us-west-1";
+var applicationName = "users-environment";
+ var environmentName = "users";
+ var regionName = "us-east-1";
 
 
 	var AWS = require('aws-sdk');
@@ -31,12 +31,13 @@
 		 {
 			 Namespace: 'aws:elasticbeanstalk:environment',
 			 OptionName: 'EnvironmentType',
-			 Value: 'SingleInstance'
+			 Value: 'LoadBalanced'
 		 },
 		 {
 			 Namespace: 'aws:autoscaling:launchconfiguration',
 			 OptionName: 'EC2KeyName',
-			 Value: 'aws'
+			 //Value: 'aws'
+			 Value: 'aws_user_key_pair'
 		 },
 		 {
 			 Namespace: 'aws:autoscaling:launchconfiguration',
@@ -61,9 +62,14 @@
 		 S3Bucket: 'test.collectors-db.com',
 		 S3Key: 'nodejs-v1.zip'
 	 }
+	// SourceBuildInformation: {
+	// 	SourceLocation: 'STRING_VALUE', /* required */
+	// 	SourceRepository: 'CodeCommit', /* required */
+	// 	SourceType: 'Git' /* required */
+	// }
  };
 
- var elasticbeanstalk = new AWS.ElasticBeanstalk();
+ var elasticbeanstalk = new AWS.ElasticBeanstalk({sslEnabled: true});
 
  function checkAvailability(){
 	var params = {
@@ -132,46 +138,50 @@ function describeApplications(){
 	});
 }
 
-deleteEnviroment();
+//deleteEnviroment();
 
-// elasticbeanstalk.createApplication(applicationParams, function(err, data){
-// 	 console.log('Creating application');
-// 	 console.log(data);
-// 	 if (err)
-// 	 {
-// 		 if (err.message.indexOf("already exists") > -1)
-// 		 {
-// 			 console.log('Application already exists, continuing on');
-// 		 }
-// 		 else
-// 		 {
-// 			 console.log(err,err.stack); // an error occurred
-// 		 }
-// 	 }
-// 	 else
-// 	 {
-// 		 elasticbeanstalk.createApplicationVersion(versionParams, function(err, data)
-// 		 {
-// 			 console.log('Creating application version....');
-// 			 console.log(data);
+create();
 
-// 			 if (err) console.log(err, err.stack); // an error occurred
+function create(){
+	elasticbeanstalk.createApplication(applicationParams, function(err, data){
+		 console.log('Creating application');
+		 console.log(data);
+		 if (err)
+		 {
+			 if (err.message.indexOf("already exists") > -1)
+			 {
+				 console.log('Application already exists, continuing on');
+			 }
+			 else
+			 {
+				 console.log(err,err.stack); // an error occurred
+			 }
+		 }
+		 else
+		 {
+			 elasticbeanstalk.createApplicationVersion(versionParams, function(err, data)
+			 {
+				 console.log('Creating application version....');
+				 console.log(data);
 
-// 			 else
-// 			 {
-// 				 elasticbeanstalk.createEnvironment(environmentParams, function(err, data)
-// 				 {
-// 					 console.log('Creating application environment....');
-// 					 console.log(data);
+				 if (err) console.log(err, err.stack); // an error occurred
 
-// 					 setTimeout(checkAvailability, 10000);
-// 					if (err) console.log(err, err.stack); // an error occurred
+				 else
+				 {
+					 elasticbeanstalk.createEnvironment(environmentParams, function(err, data)
+					 {
+						 console.log('Creating application environment....');
+						 console.log(data);
 
-// 				 });
-// 			 }
-// 		 });
-// 	 }
-//  });
+						 setTimeout(checkAvailability, 10000);
+						if (err) console.log(err, err.stack); // an error occurred
+
+					 });
+				 }
+			 });
+		 }
+	});
+}
 
 
 })();
